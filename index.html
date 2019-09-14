@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Poryscript Playground</title>
+</head>
+<body>
+	<!--
+	Add the following polyfill for Microsoft Edge 17/18 support:
+	<script src="https://cdn.jsdelivr.net/npm/text-encoding@0.7.0/lib/encoding.min.js"></script>
+	(see https://caniuse.com/#feat=textencoder)
+	-->
+	<script src="wasm_exec.js"></script>
+	<script>
+		if (!WebAssembly.instantiateStreaming) { // polyfill
+			WebAssembly.instantiateStreaming = async (resp, importObject) => {
+				const source = await (await resp).arrayBuffer();
+				return await WebAssembly.instantiate(source, importObject);
+			};
+		}
+
+		const go = new Go();
+		let mod, inst;
+		WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then((result) => {
+			mod = result.module;
+			inst = result.instance;
+			go.run(inst);
+		}).catch((err) => {
+			console.error(err);
+		});
+	</script>
+
+	<button onClick="compile();" id="compile-button">Compile</button>
+	<input type="checkbox" id="optimize-checkbox" checked>Optimize<br>
+	<textarea id="inputtext"></textarea>
+	<textarea id="outputtext"></textarea>
+</body>
+</html>
