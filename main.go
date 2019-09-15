@@ -9,45 +9,41 @@ import (
 	"github.com/huderlem/poryscript/parser"
 )
 
+func setErrorText(err string) {
+	js.Global().Get("document").Call("getElementById", "error-text").Set("innerHTML", err)
+}
+
 func compile(this js.Value, inputs []js.Value) interface{} {
 	document := js.Global().Get("document")
-	if document == js.Undefined() {
-		fmt.Println("ERROR: couldn't get document handle")
+	window := js.Global().Get("window")
+	if window == js.Undefined() {
+		fmt.Println("ERROR: couldn't get window handle")
 		return nil
 	}
-	inputElement := document.Call("getElementById", "inputtext")
-	if inputElement == js.Undefined() {
-		fmt.Println("ERROR: couldn't get input element")
-		return nil
-	}
-	outputElement := document.Call("getElementById", "outputtext")
-	if outputElement == js.Undefined() {
-		fmt.Println("ERROR: couldn't get output element")
-		return nil
-	}
+	inputScript := window.Get("inputEditor").Call("getValue").String()
 	optimizeElement := document.Call("getElementById", "optimize-checkbox")
 	if optimizeElement == js.Undefined() {
 		fmt.Println("ERROR: couldn't get optimize element")
 		return nil
 	}
 
-	scriptText := inputElement.Get("value").String()
-	parser := parser.New(lexer.New(scriptText))
+	parser := parser.New(lexer.New(inputScript))
 	program, err := parser.ParseProgram()
 	if err != nil {
-		fmt.Printf("ERROR: %s\n", err.Error())
+		setErrorText(err.Error())
 		return nil
 	}
 
 	optimize := optimizeElement.Get("checked").Bool()
 	emitter := emitter.New(program, optimize)
-	result, err := emitter.Emit()
+	resultScript, err := emitter.Emit()
 	if err != nil {
-		fmt.Printf("ERROR: %s\n", err.Error())
+		setErrorText(err.Error())
 		return nil
 	}
 
-	outputElement.Set("value", result)
+	setErrorText("")
+	window.Get("outputEditor").Call("setValue", resultScript)
 	return nil
 }
 

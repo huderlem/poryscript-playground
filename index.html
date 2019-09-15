@@ -1,38 +1,73 @@
 <!doctype html>
 <html>
 <head>
-	<meta charset="utf-8">
-	<title>Poryscript Playground</title>
+    <meta charset="utf-8">
+    <title>Poryscript Playground</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="lib/codemirror.css">
+    <script src="lib/codemirror.js"></script>
 </head>
 <body>
-	<!--
-	Add the following polyfill for Microsoft Edge 17/18 support:
-	<script src="https://cdn.jsdelivr.net/npm/text-encoding@0.7.0/lib/encoding.min.js"></script>
-	(see https://caniuse.com/#feat=textencoder)
-	-->
-	<script src="wasm_exec.js"></script>
-	<script>
-		if (!WebAssembly.instantiateStreaming) { // polyfill
-			WebAssembly.instantiateStreaming = async (resp, importObject) => {
-				const source = await (await resp).arrayBuffer();
-				return await WebAssembly.instantiate(source, importObject);
-			};
-		}
+    <!--
+    Add the following polyfill for Microsoft Edge 17/18 support:
+    <script src="https://cdn.jsdelivr.net/npm/text-encoding@0.7.0/lib/encoding.min.js"></script>
+    (see https://caniuse.com/#feat=textencoder)
+    -->
+    <script src="wasm_exec.js"></script>
+    <script>
+        if (!WebAssembly.instantiateStreaming) { // polyfill
+            WebAssembly.instantiateStreaming = async (resp, importObject) => {
+                const source = await (await resp).arrayBuffer();
+                return await WebAssembly.instantiate(source, importObject);
+            };
+        }
 
-		const go = new Go();
-		let mod, inst;
-		WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then((result) => {
-			mod = result.module;
-			inst = result.instance;
-			go.run(inst);
-		}).catch((err) => {
-			console.error(err);
-		});
-	</script>
+        const go = new Go();
+        let mod, inst;
+        WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then((result) => {
+            mod = result.module;
+            inst = result.instance;
+            go.run(inst);
+        }).catch((err) => {
+            console.error(err);
+        });
+    </script>
 
-	<button onClick="compile();" id="compile-button">Compile</button>
+	<h1>Poryscript Playground</h1>
+    <p>See <a href="https://github.com/huderlem/poryscript">https://github.com/huderlem/poryscript</a> for Poryscript documentation.</p>
+    <button onClick="compile();" id="compile-button">Compile</button>
 	<input type="checkbox" id="optimize-checkbox" checked>Optimize<br>
-	<textarea id="inputtext"></textarea>
-	<textarea id="outputtext"></textarea>
+	<p id="error-text"></p>
+    <div class="editorContainer">
+        <span class="editor"><textarea id="inputtext"># Enter your Poryscript here, and press the "Compile" button!
+script LittlerootTown_RivalHouseSign {
+    lockall
+    checkplayergender
+    if (var(VAR_RESULT) == MALE) {
+        msgbox("It's MAY's house.$")
+    } else {
+        msgbox("It's BRENDAN's house.$")
+    }
+    releaseall
+}</textarea></span>
+        <span class="editor"><textarea id="outputtext"></textarea></span>
+    </div>
+    <script>
+        window.onload = function() {
+            window.inputEditor = CodeMirror.fromTextArea(inputtext, {
+                mode: "javascript",
+                lineNumbers: true,
+                lineWrapping: true,
+                gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
+            });
+            window.outputEditor = CodeMirror.fromTextArea(outputtext, {
+                mode: "javascript",
+                lineNumbers: true,
+                lineWrapping: true,
+                readOnly: true,
+                gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
+            });
+        };
+    </script>
 </body>
 </html>

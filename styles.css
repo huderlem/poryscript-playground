@@ -1,0 +1,23 @@
+html, body {
+    height: 100%;
+}
+
+#error-text {
+    color: red;
+}
+
+.editorContainer {
+    padding-top: 10px;
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+}
+
+.editor {
+    width: 50%;
+    height: 100%;
+}
+
+.CodeMirror {
+    height: 100% !important;
+}
