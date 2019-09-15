@@ -1,5 +1,7 @@
 # Poryscript Playground
 
+Use it here: http://www.huderlem.com/poryscript-playground/
+
 This is an online playground for [Poryscript](https://github.com/huderlem/poryscript), a higher-level scripting language for Gen 3 pokemon decompilation projects.
 
 # Getting Started with Development
