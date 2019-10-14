@@ -14,26 +14,8 @@
     (see https://caniuse.com/#feat=textencoder)
     -->
     <script src="wasm_exec.js"></script>
-    <script>
-        if (!WebAssembly.instantiateStreaming) { // polyfill
-            WebAssembly.instantiateStreaming = async (resp, importObject) => {
-                const source = await (await resp).arrayBuffer();
-                return await WebAssembly.instantiate(source, importObject);
-            };
-        }
 
-        const go = new Go();
-        let mod, inst;
-        WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then((result) => {
-            mod = result.module;
-            inst = result.instance;
-            go.run(inst);
-        }).catch((err) => {
-            console.error(err);
-        });
-    </script>
-
-	<h1>Poryscript Playground</h1>
+	<h1>Poryscript Playground (Running Poryscript version [latest master (>2.4.0)])</h1>
     <p>See <a href="https://github.com/huderlem/poryscript">https://github.com/huderlem/poryscript</a> for Poryscript documentation.</p>
     <button onClick="compile();" id="compile-button">Compile</button>
 	<input type="checkbox" id="optimize-checkbox" checked>Optimize<br>
@@ -44,14 +26,15 @@ script LittlerootTown_RivalHouseSign {
     lockall
     checkplayergender
     if (var(VAR_RESULT) == MALE) {
-        msgbox("It's MAY's house.$")
+        msgbox("It's MAY's house.")
     } else {
-        msgbox("It's BRENDAN's house.$")
+        msgbox(format("It's BRENDAN's house. He was always my favorite."))
     }
     releaseall
 }</textarea></span>
         <span class="editor"><textarea id="outputtext"></textarea></span>
     </div>
+    <script src="lib/lz-string.js"></script>
     <script>
         window.onload = function() {
             window.inputEditor = CodeMirror.fromTextArea(inputtext, {
@@ -66,6 +49,34 @@ script LittlerootTown_RivalHouseSign {
                 lineWrapping: true,
                 readOnly: true,
                 gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
+            });
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const compressedCode = urlParams.get('code');
+            if (compressedCode) {
+                window.inputEditor.setValue(LZString.decompressFromEncodedURIComponent(compressedCode));
+            }
+
+            if (!WebAssembly.instantiateStreaming) { // polyfill
+                WebAssembly.instantiateStreaming = async (resp, importObject) => {
+                    const source = await (await resp).arrayBuffer();
+                    return await WebAssembly.instantiate(source, importObject);
+                };
+            }
+
+            const go = new Go();
+            let mod, inst;
+            WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then((result) => {
+                mod = result.module;
+                inst = result.instance;
+                go.run(inst);
+            }).catch((err) => {
+                console.error(err);
+            });
+
+            window.inputEditor.on("change", function(cm, change) {
+                const curCode = cm.getValue();
+                window.history.replaceState({}, "", `?code=${LZString.compressToEncodedURIComponent(curCode)}`);
             });
         };
     </script>

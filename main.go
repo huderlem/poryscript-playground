@@ -27,7 +27,7 @@ func compile(this js.Value, inputs []js.Value) interface{} {
 		return nil
 	}
 
-	parser := parser.New(lexer.New(inputScript))
+	parser := parser.New(lexer.New(inputScript), "")
 	program, err := parser.ParseProgram()
 	if err != nil {
 		setErrorText(err.Error())
