@@ -15,10 +15,11 @@
     -->
     <script src="wasm_exec.js"></script>
 
-	<h1>Poryscript Playground (Running Poryscript version [latest master (>2.4.0)])</h1>
+	<h1>Poryscript Playground (Running Poryscript version [latest master (>2.8.0)])</h1>
     <p>See <a href="https://github.com/huderlem/poryscript">https://github.com/huderlem/poryscript</a> for Poryscript documentation.</p>
     <button onClick="compile();" id="compile-button">Compile</button>
-	<input type="checkbox" id="optimize-checkbox" checked>Optimize<br>
+    <input type="checkbox" id="optimize-checkbox" checked>Optimize<br>
+    Compile-Time Switches: <input type="text" id="switches-text" size="60" value="LANG=EN GAME_VERSION=EMERALD">
 	<p id="error-text"></p>
     <div class="editorContainer">
         <span class="editor"><textarea id="inputtext"># Enter your Poryscript here, and press the "Compile" button!
@@ -36,6 +37,8 @@ script LittlerootTown_RivalHouseSign {
     </div>
     <script src="lib/lz-string.js"></script>
     <script>
+        let curCode = "";
+        let curSwitches = "LANG=EN GAME_VERSION=EMERALD";
         window.onload = function() {
             window.inputEditor = CodeMirror.fromTextArea(inputtext, {
                 mode: "javascript",
@@ -52,6 +55,18 @@ script LittlerootTown_RivalHouseSign {
             });
 
             const urlParams = new URLSearchParams(window.location.search);
+            const switches = urlParams.get('switches');
+            if (switches) {
+                const switchesInput = document.getElementById("switches-text");
+                if (switchesInput) {
+                    switchesInput.value = switches;
+                    switchesInput.addEventListener("input", function() {
+                        curSwitches = switchesInput.value;
+                        window.history.replaceState({}, "", `?switches=${curSwitches}&code=${LZString.compressToEncodedURIComponent(curCode)}`);
+                    });
+                }
+            }
+
             const compressedCode = urlParams.get('code');
             if (compressedCode) {
                 window.inputEditor.setValue(LZString.decompressFromEncodedURIComponent(compressedCode));
@@ -75,8 +90,8 @@ script LittlerootTown_RivalHouseSign {
             });
 
             window.inputEditor.on("change", function(cm, change) {
-                const curCode = cm.getValue();
-                window.history.replaceState({}, "", `?code=${LZString.compressToEncodedURIComponent(curCode)}`);
+                curCode = cm.getValue();
+                window.history.replaceState({}, "", `?switches=${curSwitches}&code=${LZString.compressToEncodedURIComponent(curCode)}`);
             });
         };
     </script>

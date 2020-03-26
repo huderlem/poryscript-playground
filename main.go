@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 	"syscall/js"
 
 	"github.com/huderlem/poryscript/emitter"
@@ -27,7 +28,22 @@ func compile(this js.Value, inputs []js.Value) interface{} {
 		return nil
 	}
 
-	parser := parser.New(lexer.New(inputScript), "")
+	compileTimeSwitchesElement := document.Call("getElementById", "switches-text")
+	if compileTimeSwitchesElement == js.Undefined() {
+		fmt.Println("ERROR: couldn't get compile-time switches input element")
+		return nil
+	}
+	compileSwitches := make(map[string]string)
+	for _, option := range strings.Split(compileTimeSwitchesElement.Get("value").String(), " ") {
+		parts := strings.SplitN(option, "=", 2)
+		if len(parts) != 2 {
+			setErrorText(fmt.Sprintf("Error: invalid compile-time switch %s\n", option))
+			return nil
+		}
+		compileSwitches[parts[0]] = parts[1]
+	}
+
+	parser := parser.New(lexer.New(inputScript), "", compileSwitches)
 	program, err := parser.ParseProgram()
 	if err != nil {
 		setErrorText(err.Error())
