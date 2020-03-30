@@ -15,10 +15,14 @@
     -->
     <script src="wasm_exec.js"></script>
 
-	<h1>Poryscript Playground (Running Poryscript version [latest master (>2.8.0)])</h1>
+	<h1>Poryscript Playground (Running Poryscript version 2.9.0-gen2-preview)</h1>
     <p>See <a href="https://github.com/huderlem/poryscript">https://github.com/huderlem/poryscript</a> for Poryscript documentation.</p>
     <button onClick="compile();" id="compile-button">Compile</button>
-    <input type="checkbox" id="optimize-checkbox" checked>Optimize<br>
+        <select id="gen-picker" name="gen-picker">
+            <option value="2">Gen 2 (pokecrystal)</option>
+            <option value="3" selected>Gen 3 (pokeemerald, pokeruby, pokefirered)</option>
+        </select>
+    <input type="checkbox" id="optimize-checkbox" checked>Optimize<br><br>
     Compile-Time Switches: <input type="text" id="switches-text" size="60" value="LANG=EN GAME_VERSION=EMERALD">
 	<p id="error-text"></p>
     <div class="editorContainer">
@@ -37,7 +41,11 @@ script LittlerootTown_RivalHouseSign {
     </div>
     <script src="lib/lz-string.js"></script>
     <script>
+        function updateUrl(switches, code, gen) {
+            window.history.replaceState({}, "", `?gen=${gen}&switches=${switches}&code=${LZString.compressToEncodedURIComponent(code)}`);
+        }
         let curCode = "";
+        let curGen = "3";
         let curSwitches = "LANG=EN GAME_VERSION=EMERALD";
         window.onload = function() {
             window.inputEditor = CodeMirror.fromTextArea(inputtext, {
@@ -55,21 +63,35 @@ script LittlerootTown_RivalHouseSign {
             });
 
             const urlParams = new URLSearchParams(window.location.search);
-            const switches = urlParams.get('switches');
-            if (switches) {
-                const switchesInput = document.getElementById("switches-text");
-                if (switchesInput) {
+
+            const switchesInput = document.getElementById("switches-text");
+            if (switchesInput) {
+                const switches = urlParams.get('switches');
+                if (switches) {
                     switchesInput.value = switches;
-                    switchesInput.addEventListener("input", function() {
-                        curSwitches = switchesInput.value;
-                        window.history.replaceState({}, "", `?switches=${curSwitches}&code=${LZString.compressToEncodedURIComponent(curCode)}`);
-                    });
                 }
+                switchesInput.addEventListener("input", function() {
+                    curSwitches = switchesInput.value;
+                    updateUrl(curSwitches, curCode, curGen);
+                });
+            }
+
+            const genInput = document.getElementById('gen-picker');
+            if (genInput) {
+                const gen = urlParams.get('gen');
+                if (gen) {
+                    genInput.value = gen;
+                }
+                genInput.addEventListener("input", function() {
+                    curGen = genInput.value;
+                    updateUrl(curSwitches, curCode, curGen);
+                });
             }
 
             const compressedCode = urlParams.get('code');
             if (compressedCode) {
-                window.inputEditor.setValue(LZString.decompressFromEncodedURIComponent(compressedCode));
+                curCode = LZString.decompressFromEncodedURIComponent(compressedCode);
+                window.inputEditor.setValue(curCode);
             }
 
             if (!WebAssembly.instantiateStreaming) { // polyfill
@@ -91,7 +113,7 @@ script LittlerootTown_RivalHouseSign {
 
             window.inputEditor.on("change", function(cm, change) {
                 curCode = cm.getValue();
-                window.history.replaceState({}, "", `?switches=${curSwitches}&code=${LZString.compressToEncodedURIComponent(curCode)}`);
+                updateUrl(curSwitches, curCode, curGen);
             });
         };
     </script>

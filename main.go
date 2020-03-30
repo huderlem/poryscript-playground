@@ -5,6 +5,8 @@ import (
 	"strings"
 	"syscall/js"
 
+	"github.com/huderlem/poryscript/types"
+
 	"github.com/huderlem/poryscript/emitter"
 	"github.com/huderlem/poryscript/lexer"
 	"github.com/huderlem/poryscript/parser"
@@ -28,6 +30,16 @@ func compile(this js.Value, inputs []js.Value) interface{} {
 		return nil
 	}
 
+	genElement := document.Call("getElementById", "gen-picker")
+	if genElement == js.Undefined() {
+		fmt.Println("ERROR: couldn't get gen picker input element")
+		return nil
+	}
+	gen := types.GEN3
+	if genElement.Get("value").String() == "2" {
+		gen = types.GEN2
+	}
+
 	compileTimeSwitchesElement := document.Call("getElementById", "switches-text")
 	if compileTimeSwitchesElement == js.Undefined() {
 		fmt.Println("ERROR: couldn't get compile-time switches input element")
@@ -43,7 +55,7 @@ func compile(this js.Value, inputs []js.Value) interface{} {
 		compileSwitches[parts[0]] = parts[1]
 	}
 
-	parser := parser.New(lexer.New(inputScript), "", compileSwitches)
+	parser := parser.New(lexer.New(inputScript, gen), gen, "", compileSwitches)
 	program, err := parser.ParseProgram()
 	if err != nil {
 		setErrorText(err.Error())
@@ -51,7 +63,7 @@ func compile(this js.Value, inputs []js.Value) interface{} {
 	}
 
 	optimize := optimizeElement.Get("checked").Bool()
-	emitter := emitter.New(program, optimize)
+	emitter := emitter.New(program, gen, optimize)
 	resultScript, err := emitter.Emit()
 	if err != nil {
 		setErrorText(err.Error())
