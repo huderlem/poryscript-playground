@@ -17,19 +17,19 @@ func setErrorText(err string) {
 func compile(this js.Value, inputs []js.Value) interface{} {
 	document := js.Global().Get("document")
 	window := js.Global().Get("window")
-	if window == js.Undefined() {
+	if window.IsUndefined() {
 		fmt.Println("ERROR: couldn't get window handle")
 		return nil
 	}
 	inputScript := window.Get("inputEditor").Call("getValue").String()
 	optimizeElement := document.Call("getElementById", "optimize-checkbox")
-	if optimizeElement == js.Undefined() {
+	if optimizeElement.IsUndefined() {
 		fmt.Println("ERROR: couldn't get optimize element")
 		return nil
 	}
 
 	compileTimeSwitchesElement := document.Call("getElementById", "switches-text")
-	if compileTimeSwitchesElement == js.Undefined() {
+	if compileTimeSwitchesElement.IsUndefined() {
 		fmt.Println("ERROR: couldn't get compile-time switches input element")
 		return nil
 	}
@@ -43,7 +43,7 @@ func compile(this js.Value, inputs []js.Value) interface{} {
 		compileSwitches[parts[0]] = parts[1]
 	}
 
-	parser := parser.New(lexer.New(inputScript), "", compileSwitches)
+	parser := parser.New(lexer.New(inputScript), "", "", 208, compileSwitches)
 	program, err := parser.ParseProgram()
 	if err != nil {
 		setErrorText(err.Error())
