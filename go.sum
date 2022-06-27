@@ -1,6 +1,2 @@
-github.com/huderlem/poryscript v0.0.0-20200326013553-9ee5443c8898 h1:t8ngAPFS7ohr80cxYbJKVNHDrBdtaktvwUUN/erT4/s=
-github.com/huderlem/poryscript v0.0.0-20200326013553-9ee5443c8898/go.mod h1:MnP/SQUqwI0gdrSC388x39hss09TCEXQ/mCgDSWVWDE=
-github.com/shurcooL/go v0.0.0-20200502201357-93f07166e636 h1:aSISeOcal5irEhJd1M+IrApc0PdcN7e7Aj4yuEnOrfQ=
-github.com/shurcooL/go v0.0.0-20200502201357-93f07166e636/go.mod h1:TDJrrUr11Vxrven61rcy3hJMUqaf/CLWYhHNPmT14Lk=
-github.com/shurcooL/go-goon v0.0.0-20210110234559-7585751d9a17 h1:lRAUE0dIvigSSFAmaM2dfg7OH8T+a8zJ5smEh09a/GI=
-github.com/shurcooL/go-goon v0.0.0-20210110234559-7585751d9a17/go.mod h1:N5mDOmsrJOB+vfqUK+7DmDyjhSLIIBnXo9lvZJj3MWQ=
+github.com/huderlem/poryscript v0.0.0-20220627151046-6f23f8947771 h1:CctWqumCLzKcpvEYoY1ZWDK/Ph7PvAPdDe9LSLfGM0I=
+github.com/huderlem/poryscript v0.0.0-20220627151046-6f23f8947771/go.mod h1:MnP/SQUqwI0gdrSC388x39hss09TCEXQ/mCgDSWVWDE=
